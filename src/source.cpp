@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <complex>
 #include <vector>
 #include <omp.h>
@@ -59,7 +60,7 @@ void m_FFT(t_complex_vector &src, t_complex_vector &res)
 	{
 		pre_calculated_wnk[i] = w(size, i);
 	}
-	if (res != src)
+	if (&res != &src)
 		res = src;
 	pre_permutation_algorithm(res);
 	for (int i = 0; i < iterations; ++i)
@@ -73,6 +74,7 @@ void m_FFT(t_complex_vector &src, t_complex_vector &res)
 				buffer[j * subsequence_size * 2 + subsequence_size + t] = res[j * subsequence_size * 2 + t] - pre_calculated_wnk[t * (size / (subsequence_size * 2))] * res[j * subsequence_size * 2 + subsequence_size + t];
 			}
 		}
+		#pragma omp parallel for
 		for (int k = 0; k < size; ++k)
 		{
 			res[k] = buffer[k];
@@ -130,7 +132,7 @@ void mkl_fft(t_complex_vector& in, t_complex_vector &out)
 		placement = DFTI_CONFIG_VALUE::DFTI_NOT_INPLACE;
 	}
 	status = DftiCreateDescriptor(&descriptor, presicion, DFTI_COMPLEX, 1, in.size()); //Specify size and precision
-	status = DftiSetValue(descriptor, DFTI_PLACEMENT, placement); //Out of place FFT
+	status = DftiSetValue(descriptor, DFTI_PLACEMENT, placement); //In/out of place FFT
 	status = DftiCommitDescriptor(descriptor); //Finalize the descriptor
 	status = DftiComputeForward(descriptor, in.data(), out.data()); //Compute the Forward FFT
 	status = DftiFreeDescriptor(&descriptor); //Free the descriptor
@@ -138,23 +140,33 @@ void mkl_fft(t_complex_vector& in, t_complex_vector &out)
 
 int main()
 {
-	int n = 8192*2048;
-	double start;
-	double finish;
+	int n = 8192 * 128;
+	double mkl_time;
+	double my_fft_time;
+	std::ofstream file_out("../out.xls");
 	std::vector<std::complex<el_type>> x(n, std::complex<el_type>());
 	std::vector<std::complex<el_type>> y(n, std::complex<el_type>());
+	file_out << "size" << '\t' << "MKL_FFT" << '\t' << "MY_FFT" << std::endl;
 	for (int i = 0; i < n; ++i)
 	{
 		y[i] = x[i] = std::complex<el_type>(rand() % 20 / 10. - 1, rand() % 20 / 10. - 1);
 	}
-	start = omp_get_wtime();
-	mkl_fft(y, y);
-	finish = omp_get_wtime();
-	std::cout << finish - start << " - MKL" << std::endl;
-	start = omp_get_wtime();
-	m_FFT(x, x);
-	finish = omp_get_wtime();
-	std::cout << finish - start << " - MINE" << std::endl;
-	std::cout << check(1.e-8,x, y) << std::endl;
+	for (int i = 0; i < 5; ++i)
+	{
+		mkl_time = omp_get_wtime();
+		mkl_fft(y, y);
+		mkl_time = omp_get_wtime() - mkl_time;
+		my_fft_time = omp_get_wtime();
+		m_FFT(x, x);
+		my_fft_time = omp_get_wtime() - my_fft_time;
+		file_out << n << '\t' << mkl_time << '\t' << my_fft_time << std::endl;
+		n *= 2;
+		x.resize(n);
+		y.resize(n);
+		for (int i = 0; i < n; ++i)
+		{
+			y[i] = x[i] = std::complex<el_type>(rand() % 20 / 10. - 1, rand() % 20 / 10. - 1);
+		}
+	}
 	return 0;
 }
