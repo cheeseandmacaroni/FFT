@@ -30,3 +30,5 @@
 # build
 build
 build x64
+out.xls
+
