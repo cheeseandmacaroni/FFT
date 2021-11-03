@@ -50,35 +50,69 @@ void pre_permutation_algorithm(T &src)//src.size() must be power of 2
 	src = res;
 }
 
-void m_FFT(t_complex_vector &src, t_complex_vector &res)
+void m_FFT(t_complex_vector &src, t_complex_vector &res, bool mthread_param)
 {
-	int size = src.size();
+	size_t size = src.size();
 	int iterations = my_log_2(size);
-	int subsequence_size = 1;
-	t_complex_vector pre_calculated_wnk(size / 2);
+	size_t subsequence_size = 1;
 	t_complex_vector buffer(size);
-	for (size_t i = 0; i < size / 2; ++i)
-	{
-		pre_calculated_wnk[i] = w(size, i);
-	}
 	if (&res != &src)
 		res = src;
 	pre_permutation_algorithm(res);
 	for (int i = 0; i < iterations; ++i)
 	{
-		#pragma omp parallel for 
+#pragma omp parallel for if (mthread_param == 1)
 		for (int j = 0; j < size / (subsequence_size * 2); ++j)
 		{
 			for (int t = 0; t < subsequence_size; ++t)
 			{
-				buffer[j * subsequence_size * 2 + t] = res[j * subsequence_size * 2 + t] + pre_calculated_wnk[t * (size / (subsequence_size * 2))] * res[j * subsequence_size * 2 + subsequence_size + t];
-				buffer[j * subsequence_size * 2 + subsequence_size + t] = res[j * subsequence_size * 2 + t] - pre_calculated_wnk[t * (size / (subsequence_size * 2))] * res[j * subsequence_size * 2 + subsequence_size + t];
+				buffer[j * subsequence_size * 2 + t] = res[j * subsequence_size * 2 + t] + w(size, t * (size / (subsequence_size * 2))) * res[j * subsequence_size * 2 + subsequence_size + t];
+				buffer[j * subsequence_size * 2 + subsequence_size + t] = res[j * subsequence_size * 2 + t] - w(size, t * (size / (subsequence_size * 2)))* res[j * subsequence_size * 2 + subsequence_size + t];
 			}
 		}
-		#pragma omp parallel for
 		for (int k = 0; k < size; ++k)
 		{
 			res[k] = buffer[k];
+		}
+		subsequence_size *= 2;
+	}
+}
+
+void m_FFT_vectorized(std::vector<el_type> &src_real, std::vector<el_type> &src_im, std::vector<el_type> &res_real, std::vector<el_type> &res_im, bool mthread_param)
+{
+	size_t size = src_real.size();
+	int iterations = my_log_2(size);
+	size_t subsequence_size = 1;
+	std::vector<el_type> buffer_real(size);
+	std::vector<el_type> buffer_imag(size);
+	el_type tmp_real;
+	el_type tmp_im;
+	if (&src_real != &res_real)
+		res_real = src_real;
+	if (&src_im != &res_im)
+		res_im = src_im;
+	pre_permutation_algorithm(res_real);
+	pre_permutation_algorithm(res_im);
+	for (int i = 0; i < iterations; ++i)
+	{
+#pragma omp parallel for if (mthread_param == 1)
+		for (int j = 0; j < size / (subsequence_size * 2); ++j)
+		{
+			for (int t = 0; t < subsequence_size; ++t)
+			{
+				tmp_real = cos(2 * (Pi / subsequence_size / 2)*t);
+				tmp_im = -sin(2 * (Pi / subsequence_size / 2)*t);
+				buffer_real[j * subsequence_size * 2 + t] = res_real[j * subsequence_size * 2 + t] + (tmp_real * res_real[j * subsequence_size * 2 + subsequence_size + t] - tmp_im * res_im[j * subsequence_size * 2 + subsequence_size + t]);
+				buffer_imag[j * subsequence_size * 2 + t] = res_im[j * subsequence_size * 2 + t] + (tmp_im * res_real[j * subsequence_size * 2 + subsequence_size + t] + tmp_real * res_im[j * subsequence_size * 2 + subsequence_size + t]);
+
+				buffer_real[j * subsequence_size * 2 + subsequence_size + t] = res_real[j * subsequence_size * 2 + t] - (tmp_real * res_real[j * subsequence_size * 2 + subsequence_size + t] - tmp_im * res_im[j * subsequence_size * 2 + subsequence_size + t]);
+				buffer_imag[j * subsequence_size * 2 + subsequence_size + t] = res_im[j * subsequence_size * 2 + t] - (tmp_im * res_real[j * subsequence_size * 2 + subsequence_size + t] + tmp_real * res_im[j * subsequence_size * 2 + subsequence_size + t]);
+			}
+		}
+		for (int k = 0; k < size; ++k)
+		{
+			res_real[k] = buffer_real[k];
+			res_im[k] = buffer_imag[k];
 		}
 		subsequence_size *= 2;
 	}
@@ -102,7 +136,7 @@ bool check(el_type eps, t_complex_vector &a, t_complex_vector &b)
 {
 	for (size_t i = 0; i < a.size(); ++i)
 	{
-		if(abs(a[i].imag() - b[i].imag()) > eps || abs(a[i].real() - b[i].real()) > eps)
+		if (abs(a[i].imag() - b[i].imag()) > eps || abs(a[i].real() - b[i].real()) > eps)
 		{
 			return false;
 		}
@@ -110,8 +144,9 @@ bool check(el_type eps, t_complex_vector &a, t_complex_vector &b)
 	return true;
 }
 
-void mkl_fft(t_complex_vector& in, t_complex_vector &out) 
+void mkl_fft(t_complex_vector& in, t_complex_vector &out)
 {
+
 	DFTI_DESCRIPTOR_HANDLE descriptor;
 	MKL_LONG status;
 	DFTI_CONFIG_VALUE precision;
@@ -141,17 +176,24 @@ void mkl_fft(t_complex_vector& in, t_complex_vector &out)
 
 int main()
 {
-	int n = 32768;
+	size_t n = 32768;
 	double mkl_time;
 	double my_fft_time;
+	double my_vectorized_fft_time;
 	std::ofstream file_out("../out.xls");
 	file_out << std::fixed << std::showpoint << std::setprecision(3);
 	std::vector<std::complex<el_type>> x(n, std::complex<el_type>());
 	std::vector<std::complex<el_type>> y(n, std::complex<el_type>());
-	file_out << "size" << '\t' << "MKL_FFT" << '\t' << "MY_FFT" << std::endl;
+	std::vector<el_type> z_real(n);
+	std::vector<el_type> z_im(n);
+	file_out << "size" << '\t' << "MKL_FFT" << '\t' << "MY_FFT" << '\t' << "MY_FFT_VECTORIZED" << std::endl;
 	for (int i = 0; i < n; ++i)
 	{
-		y[i] = x[i] = std::complex<el_type>(rand() % 20 / 10. - 1, rand() % 20 / 10. - 1);
+		el_type real = rand() % 20 / 10. - 1;
+		el_type imag = rand() % 20 / 10. - 1;
+		y[i] = x[i] = std::complex<el_type>(real, imag);
+		z_real[i] = real;
+		z_im[i] = imag;
 	}
 	for (int i = 0; i < 12; ++i)
 	{
@@ -159,15 +201,24 @@ int main()
 		mkl_fft(y, y);
 		mkl_time = omp_get_wtime() - mkl_time;
 		my_fft_time = omp_get_wtime();
-		m_FFT(x, x);
+		m_FFT(x, x, 1);
 		my_fft_time = omp_get_wtime() - my_fft_time;
-		file_out << n << '\t' << mkl_time << '\t' << my_fft_time << std::endl;
+		my_vectorized_fft_time = omp_get_wtime();
+		m_FFT_vectorized(z_real, z_im, z_real, z_im, 1);
+		my_vectorized_fft_time = omp_get_wtime() - my_vectorized_fft_time;
+		file_out << n << '\t' << mkl_time << '\t' << my_fft_time << '\t' << my_vectorized_fft_time << std::endl;
 		n *= 2;
 		x.resize(n);
 		y.resize(n);
+		z_real.resize(n);
+		z_im.resize(n);
 		for (int i = 0; i < n; ++i)
 		{
-			y[i] = x[i] = std::complex<el_type>(rand() % 20 / 10. - 1, rand() % 20 / 10. - 1);
+			el_type real = rand() % 20 / 10. - 1;
+			el_type imag = rand() % 20 / 10. - 1;
+			y[i] = x[i] = std::complex<el_type>(real, imag);
+			z_real[i] = real;
+			z_im[i] = imag;
 		}
 	}
 	return 0;
