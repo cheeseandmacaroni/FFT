@@ -61,7 +61,7 @@ void m_FFT(t_complex_vector &src, t_complex_vector &res, bool mthread_param)
 	pre_permutation_algorithm(res);
 	for (int i = 0; i < iterations; ++i)
 	{
-#pragma omp parallel for if (mthread_param == 1)
+#pragma omp parallel for if (mthread_param == 1 && size >= 1024)
 		for (int j = 0; j < size / (subsequence_size * 2); ++j)
 		{
 			for (int t = 0; t < subsequence_size; ++t)
@@ -95,7 +95,7 @@ void m_FFT_vectorized(std::vector<el_type> &src_real, std::vector<el_type> &src_
 	pre_permutation_algorithm(res_im);
 	for (int i = 0; i < iterations; ++i)
 	{
-#pragma omp parallel for if (mthread_param == 1)
+#pragma omp parallel for if (mthread_param == 1 && size >= 1024)
 		for (int j = 0; j < size / (subsequence_size * 2); ++j)
 		{
 			for (int t = 0; t < subsequence_size; ++t)
@@ -116,6 +116,57 @@ void m_FFT_vectorized(std::vector<el_type> &src_real, std::vector<el_type> &src_
 		}
 		subsequence_size *= 2;
 	}
+}
+
+void m_two_dimensional_FT(t_complex_vector &src, size_t n, size_t m, bool mthread_param)
+{
+	t_complex_vector temp(m);
+	#pragma omp parallel for if (mthread_param == 1)
+	for (int i = 0; i < n; ++i)
+	{
+		for (int j = 0; j < m; ++j)
+		{
+			temp[j] = src[i*m + j];
+		}
+		m_FFT(temp, temp, 1);
+		for (int j = 0; j < m; ++j)
+		{
+			src[i*m + j] = temp[j];
+		}
+	}
+	temp.resize(n);
+	#pragma omp parallel for if (mthread_param == 1)
+	for (int i = 0; i < m; ++i)
+	{
+		for (int j = 0; j < n; ++j)
+		{
+			temp[j] = src[i + j * m];
+		}
+		m_FFT(temp, temp, 1);
+		for (int j = 0; j < n; ++j)
+		{
+			src[i + j * m] = temp[j];
+		}
+	}
+}
+
+void m_two_dimensional_DFT(t_complex_vector &src, size_t N, size_t M)
+{
+	t_complex_vector res(N*M);
+	for (size_t k = 0; k < N; ++k)
+	{
+		for (size_t l = 0; l < M; ++l)
+		{
+			for (size_t m = 0; m < M; ++m)
+			{
+				for (size_t n = 0; n < N; ++n)
+				{
+					res[k*M + l] += src[n*M + m] * dft_w(M, m, l) * dft_w(N, n, k);
+				}
+			}
+		}
+	}
+	src = res;
 }
 
 void DFT(t_complex_vector &x)
@@ -174,7 +225,7 @@ void mkl_fft(t_complex_vector& in, t_complex_vector &out)
 	status = DftiFreeDescriptor(&descriptor); //Free the descriptor
 }
 
-int main()
+void test_1()
 {
 	size_t n = 32768;
 	double mkl_time;
@@ -182,8 +233,8 @@ int main()
 	double my_vectorized_fft_time;
 	std::ofstream file_out("../out.xls");
 	file_out << std::fixed << std::showpoint << std::setprecision(3);
-	std::vector<std::complex<el_type>> x(n, std::complex<el_type>());
-	std::vector<std::complex<el_type>> y(n, std::complex<el_type>());
+	t_complex_vector x(n);
+	t_complex_vector y(n);
 	std::vector<el_type> z_real(n);
 	std::vector<el_type> z_im(n);
 	file_out << "size" << '\t' << "MKL_FFT" << '\t' << "MY_FFT" << '\t' << "MY_FFT_VECTORIZED" << std::endl;
@@ -221,5 +272,66 @@ int main()
 			z_im[i] = imag;
 		}
 	}
+}
+void test2()
+{
+	size_t n = 64;
+	size_t m = 64;
+	t_complex_vector x(n*m);
+	t_complex_vector y(n*m);
+	for (int i = 0; i < n * m; ++i)
+	{
+		el_type real = rand() % 20 / 10. - 1;
+		el_type imag = rand() % 20 / 10. - 1;
+		y[i] = x[i] = std::complex<el_type>(real, imag);
+	}
+	m_two_dimensional_DFT(y, n, m);
+	m_two_dimensional_FT(x, n, m, 0);
+	std::cout << check(1.e-7, x, y) << std::endl;
+}
+void test3()
+{
+	size_t n = 32;
+	size_t m = 32;
+	t_complex_vector x(n*m);
+	t_complex_vector y(n*m);
+	double dft_time;
+	double fft_time;
+	std::ofstream file_out("../out.xls");
+	file_out << std::fixed << std::showpoint << std::setprecision(3);
+	file_out << "size" << '\t' << "2D_DFT" << '\t' << "2D_FT_USING_1DFFT" << std::endl;
+	for (int i = 0; i < n * m; ++i)
+	{
+		el_type real = rand() % 20 / 10. - 1;
+		el_type imag = rand() % 20 / 10. - 1;
+		y[i] = x[i] = std::complex<el_type>(real, imag);
+	}
+	for (int i = 0; i < 4; ++i)
+	{
+		dft_time = omp_get_wtime();
+		m_two_dimensional_DFT(y, n, m);
+		dft_time = omp_get_wtime() - dft_time;
+		fft_time = omp_get_wtime();
+		m_two_dimensional_FT(x, n, m, 0);
+		fft_time = omp_get_wtime() - fft_time;
+		file_out << n*m << '\t' << dft_time << '\t' << fft_time << std::endl;
+		n *= 2;
+		m *= 2;
+		x.resize(n*m);
+		y.resize(n*m);
+		for (int i = 0; i < n * m; ++i)
+		{
+			el_type real = rand() % 20 / 10. - 1;
+			el_type imag = rand() % 20 / 10. - 1;
+			y[i] = x[i] = std::complex<el_type>(real, imag);
+		}
+		std::cout << check(1.e-7, x, y);
+	}
+}
+
+int main()
+{
+	test3();
+	while (1);
 	return 0;
 }
