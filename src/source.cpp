@@ -61,7 +61,7 @@ void m_FFT(t_complex_vector &src, t_complex_vector &res, bool mthread_param)
 	pre_permutation_algorithm(res);
 	for (int i = 0; i < iterations; ++i)
 	{
-#pragma omp parallel for if (mthread_param == 1 && size >= 1024)
+		#pragma omp parallel for if (mthread_param == 1 && size >= 1024)
 		for (int j = 0; j < size / (subsequence_size * 2); ++j)
 		{
 			for (int t = 0; t < subsequence_size; ++t)
@@ -70,10 +70,7 @@ void m_FFT(t_complex_vector &src, t_complex_vector &res, bool mthread_param)
 				buffer[j * subsequence_size * 2 + subsequence_size + t] = res[j * subsequence_size * 2 + t] - w(size, t * (size / (subsequence_size * 2)))* res[j * subsequence_size * 2 + subsequence_size + t];
 			}
 		}
-		for (int k = 0; k < size; ++k)
-		{
-			res[k] = buffer[k];
-		}
+		res.swap(buffer);
 		subsequence_size *= 2;
 	}
 }
@@ -104,16 +101,12 @@ void m_FFT_vectorized(std::vector<el_type> &src_real, std::vector<el_type> &src_
 				tmp_im = -sin(2 * (Pi / subsequence_size / 2)*t);
 				buffer_real[j * subsequence_size * 2 + t] = res_real[j * subsequence_size * 2 + t] + (tmp_real * res_real[j * subsequence_size * 2 + subsequence_size + t] - tmp_im * res_im[j * subsequence_size * 2 + subsequence_size + t]);
 				buffer_imag[j * subsequence_size * 2 + t] = res_im[j * subsequence_size * 2 + t] + (tmp_im * res_real[j * subsequence_size * 2 + subsequence_size + t] + tmp_real * res_im[j * subsequence_size * 2 + subsequence_size + t]);
-
 				buffer_real[j * subsequence_size * 2 + subsequence_size + t] = res_real[j * subsequence_size * 2 + t] - (tmp_real * res_real[j * subsequence_size * 2 + subsequence_size + t] - tmp_im * res_im[j * subsequence_size * 2 + subsequence_size + t]);
 				buffer_imag[j * subsequence_size * 2 + subsequence_size + t] = res_im[j * subsequence_size * 2 + t] - (tmp_im * res_real[j * subsequence_size * 2 + subsequence_size + t] + tmp_real * res_im[j * subsequence_size * 2 + subsequence_size + t]);
 			}
 		}
-		for (int k = 0; k < size; ++k)
-		{
-			res_real[k] = buffer_real[k];
-			res_im[k] = buffer_imag[k];
-		}
+		res_real.swap(buffer_real);
+		res_im.swap(buffer_imag);
 		subsequence_size *= 2;
 	}
 }
@@ -166,7 +159,7 @@ void m_two_dimensional_DFT(t_complex_vector &src, size_t N, size_t M)
 			}
 		}
 	}
-	src = res;
+	src.swap(res);
 }
 
 void DFT(t_complex_vector &x)
@@ -273,7 +266,7 @@ void test_1()
 		}
 	}
 }
-void test2()
+void test_2()
 {
 	size_t n = 64;
 	size_t m = 64;
@@ -289,7 +282,7 @@ void test2()
 	m_two_dimensional_FT(x, n, m, 0);
 	std::cout << check(1.e-7, x, y) << std::endl;
 }
-void test3()
+void test_3()
 {
 	size_t n = 32;
 	size_t m = 32;
@@ -331,7 +324,6 @@ void test3()
 
 int main()
 {
-	test3();
-	while (1);
+	test_1();
 	return 0;
 }
