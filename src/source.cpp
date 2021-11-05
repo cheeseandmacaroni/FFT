@@ -55,7 +55,8 @@ void m_FFT(t_complex_vector &src, t_complex_vector &res, bool mthread_param)
 	size_t size = src.size();
 	int iterations = my_log_2(size);
 	size_t subsequence_size = 1;
-	t_complex_vector buffer(size);
+	std::complex<el_type> temp_first;
+	std::complex<el_type> temp_second;
 	if (&res != &src)
 		res = src;
 	pre_permutation_algorithm(res);
@@ -66,11 +67,12 @@ void m_FFT(t_complex_vector &src, t_complex_vector &res, bool mthread_param)
 		{
 			for (int t = 0; t < subsequence_size; ++t)
 			{
-				buffer[j * subsequence_size * 2 + t] = res[j * subsequence_size * 2 + t] + w(size, t * (size / (subsequence_size * 2))) * res[j * subsequence_size * 2 + subsequence_size + t];
-				buffer[j * subsequence_size * 2 + subsequence_size + t] = res[j * subsequence_size * 2 + t] - w(size, t * (size / (subsequence_size * 2)))* res[j * subsequence_size * 2 + subsequence_size + t];
+				temp_first = res[j * subsequence_size * 2 + t] + w(size, t * (size / (subsequence_size * 2))) * res[j * subsequence_size * 2 + subsequence_size + t];
+				temp_second = res[j * subsequence_size * 2 + t] - w(size, t * (size / (subsequence_size * 2)))* res[j * subsequence_size * 2 + subsequence_size + t];
+				res[j * subsequence_size * 2 + t] = temp_first;
+				res[j * subsequence_size * 2 + subsequence_size + t] = temp_second;
 			}
 		}
-		res.swap(buffer);
 		subsequence_size *= 2;
 	}
 }
@@ -80,10 +82,12 @@ void m_FFT_vectorized(std::vector<el_type> &src_real, std::vector<el_type> &src_
 	size_t size = src_real.size();
 	int iterations = my_log_2(size);
 	size_t subsequence_size = 1;
-	std::vector<el_type> buffer_real(size);
-	std::vector<el_type> buffer_imag(size);
-	el_type tmp_real;
-	el_type tmp_im;
+	el_type temp_cos;
+	el_type temp_sin;
+	el_type temp_real_t;
+	el_type temp_real_ss_plus_t;
+	el_type temp_imag_t;
+	el_type temp_imag_ss_plus_t;
 	if (&src_real != &res_real)
 		res_real = src_real;
 	if (&src_im != &res_im)
@@ -92,21 +96,24 @@ void m_FFT_vectorized(std::vector<el_type> &src_real, std::vector<el_type> &src_
 	pre_permutation_algorithm(res_im);
 	for (int i = 0; i < iterations; ++i)
 	{
-#pragma omp parallel for if (mthread_param == 1 && size >= 1024)
+	#pragma omp parallel for if (mthread_param == 1 && size >= 1024)
 		for (int j = 0; j < size / (subsequence_size * 2); ++j)
 		{
+		#pragma ivdep
 			for (int t = 0; t < subsequence_size; ++t)
 			{
-				tmp_real = cos(2 * (Pi / subsequence_size / 2)*t);
-				tmp_im = -sin(2 * (Pi / subsequence_size / 2)*t);
-				buffer_real[j * subsequence_size * 2 + t] = res_real[j * subsequence_size * 2 + t] + (tmp_real * res_real[j * subsequence_size * 2 + subsequence_size + t] - tmp_im * res_im[j * subsequence_size * 2 + subsequence_size + t]);
-				buffer_imag[j * subsequence_size * 2 + t] = res_im[j * subsequence_size * 2 + t] + (tmp_im * res_real[j * subsequence_size * 2 + subsequence_size + t] + tmp_real * res_im[j * subsequence_size * 2 + subsequence_size + t]);
-				buffer_real[j * subsequence_size * 2 + subsequence_size + t] = res_real[j * subsequence_size * 2 + t] - (tmp_real * res_real[j * subsequence_size * 2 + subsequence_size + t] - tmp_im * res_im[j * subsequence_size * 2 + subsequence_size + t]);
-				buffer_imag[j * subsequence_size * 2 + subsequence_size + t] = res_im[j * subsequence_size * 2 + t] - (tmp_im * res_real[j * subsequence_size * 2 + subsequence_size + t] + tmp_real * res_im[j * subsequence_size * 2 + subsequence_size + t]);
+				temp_cos = cos(Pi / subsequence_size*t);
+				temp_sin = -sin(Pi / subsequence_size*t);
+				temp_real_t = res_real[j * subsequence_size * 2 + t] + (temp_cos * res_real[j * subsequence_size * 2 + subsequence_size + t] - temp_sin * res_im[j * subsequence_size * 2 + subsequence_size + t]);
+				temp_imag_t = res_im[j * subsequence_size * 2 + t] + (temp_sin * res_real[j * subsequence_size * 2 + subsequence_size + t] + temp_cos * res_im[j * subsequence_size * 2 + subsequence_size + t]);
+				temp_real_ss_plus_t = res_real[j * subsequence_size * 2 + t] - (temp_cos * res_real[j * subsequence_size * 2 + subsequence_size + t] - temp_sin * res_im[j * subsequence_size * 2 + subsequence_size + t]);
+				temp_imag_ss_plus_t = res_im[j * subsequence_size * 2 + t] - (temp_sin * res_real[j * subsequence_size * 2 + subsequence_size + t] + temp_cos * res_im[j * subsequence_size * 2 + subsequence_size + t]);
+				res_real[j * subsequence_size * 2 + t] = temp_real_t;
+				res_im[j * subsequence_size * 2 + t] = temp_imag_t;
+				res_real[j * subsequence_size * 2 + subsequence_size + t] = temp_real_ss_plus_t;
+				res_im[j * subsequence_size * 2 + subsequence_size + t] = temp_imag_ss_plus_t;
 			}
 		}
-		res_real.swap(buffer_real);
-		res_im.swap(buffer_imag);
 		subsequence_size *= 2;
 	}
 }
@@ -322,8 +329,27 @@ void test_3()
 	}
 }
 
+void test_4()
+{
+	size_t n = 1024;
+	t_complex_vector x(n);
+	t_complex_vector y(n);
+	std::vector<el_type> z_real(n);
+	std::vector<el_type> z_im(n);
+	for (int i = 0; i < n; ++i)
+	{
+		el_type real = rand() % 20 / 10. - 1;
+		el_type imag = rand() % 20 / 10. - 1;
+		y[i] = x[i] = std::complex<el_type>(real, imag);
+	}
+	mkl_fft(x, x);
+	m_FFT(y, y, 1);
+	std::cout << check(1.e-7, x, y);
+}
+
 int main()
 {
 	test_1();
+
 	return 0;
 }
