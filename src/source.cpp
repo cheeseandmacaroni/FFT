@@ -26,7 +26,7 @@ T m_reverse(T a, int bit_len)
 	return res;
 }
 
-int my_log_2(int a)
+inline int my_log_2(int a)
 {
 	int res = 0;
 	int tmp = 1;
@@ -78,7 +78,7 @@ void m_FFT(t_complex_vector &src, t_complex_vector &res, bool mthread_param)
 	}
 }
 
-size_t calculate_W_n_exponent(size_t bits, size_t cur_epoch, size_t passes, size_t cur_pass, size_t g_counter, size_t b_counter)
+inline size_t calculate_W_n_exponent(size_t bits, size_t cur_epoch, size_t passes, size_t cur_pass, size_t g_counter, size_t b_counter)
 {
 	size_t res = 0;
 	res |= (g_counter & (1 << cur_epoch * passes) - 1); //g0,g1...
@@ -92,38 +92,16 @@ size_t calculate_W_n_exponent(size_t bits, size_t cur_epoch, size_t passes, size
 	return res;
 }
 
-std::pair<size_t, size_t> calculate_butterfly_adresses(size_t bits, size_t cur_epoch, size_t passes, size_t cur_pass, size_t g_counter, size_t b_counter)
-{
-	size_t first_adress = 0;
-	size_t second_adress = 0;
-	first_adress |= (g_counter & (1 << cur_epoch * passes) - 1); //g0,g1...
-	for (size_t i = (cur_epoch + 1) * passes; i < bits; ++i) //gn-1,gn...
-	{
-		first_adress |= ((g_counter >> (i - passes)) & 1) << i;
-	}
-	int k = 0;
-	for (size_t i = cur_epoch * passes; i < cur_epoch * passes + cur_pass; ++i)//b0,b1...
-	{
-		first_adress |= (((b_counter >> k) & 1) << i);
-		++k;
-	}
-	for (size_t i = cur_epoch * passes + cur_pass + 1; i < (cur_epoch + 1) * passes; ++i)//bn-1,bn...
-	{
-		first_adress |= (((b_counter >> k) & 1) << i);
-		++k;
-	}
-	second_adress = first_adress | (1 << (cur_epoch * passes + cur_pass));
-	return std::pair<size_t, size_t>(first_adress, second_adress);
-}
-
 void m_FFT_vectorized_cached(std::vector<el_type> &src_real, std::vector<el_type> &src_im, std::vector<el_type> &res_real, std::vector<el_type> &res_im, size_t max_group_size, bool mthread_param)
 {
 	size_t size = src_real.size();
 	int iterations = my_log_2(size);
 	size_t max_passes = my_log_2(max_group_size);
 	size_t epochs;
-	size_t passes = 1;
-	size_t group_size = 2;
+	size_t group_size = size < max_group_size ? size : max_group_size;
+	size_t passes = my_log_2(group_size);
+	size_t adress_prefix_bit_mask;
+	size_t adress_postfix_bit_mask;
 	el_type temp_cos;
 	el_type temp_sin;
 	if (&src_real != &res_real)
@@ -132,20 +110,13 @@ void m_FFT_vectorized_cached(std::vector<el_type> &src_real, std::vector<el_type
 		res_im = src_im;
 	pre_permutation_algorithm(res_real);
 	pre_permutation_algorithm(res_im);
-	for (size_t i = 2; i <= iterations; ++i)
-	{
-		if ((iterations % i == 0) && (i <= max_passes))
-		{
-			passes = i;
-		}
-	}
 	epochs = iterations / passes;
-	group_size = pow(2, passes);
-	std::vector<el_type> buf_real(group_size);
-	std::vector<el_type> buf_imag(group_size);
 	for (size_t epoch_counter = 0; epoch_counter < epochs; ++epoch_counter)
 	{
-		for (size_t group_counter = 0; group_counter < size / group_size; ++group_counter)
+		adress_prefix_bit_mask = (1 << epoch_counter * passes) - 1;
+		adress_postfix_bit_mask = ~adress_prefix_bit_mask;
+		#pragma omp parallel for if(mthread_param == 1)
+		for (int group_counter = 0; group_counter < size / group_size; ++group_counter)
 		{
 			size_t subsequence_size = 1;
 			size_t t_adress;
@@ -153,16 +124,21 @@ void m_FFT_vectorized_cached(std::vector<el_type> &src_real, std::vector<el_type
 			el_type temp_real_ss_plus_t;
 			el_type temp_imag_t;
 			el_type temp_imag_ss_plus_t;
+			std::vector<el_type> buf_real(group_size);
+			std::vector<el_type> buf_imag(group_size);
 			size_t exp;
-				std::pair<size_t, size_t> adresses;
-				size_t cur_group;
+			size_t first_adress;
+			size_t second_adress;
+			size_t cur_group;
+			#pragma omp parallel for if(mthread_param == 1 && group_size >= 512)
 			for (int i = 0; i < group_size / 2; ++i)//load to cache
 			{
-				adresses = calculate_butterfly_adresses(iterations, epoch_counter, passes, 0, group_counter, i);
-				buf_real[2 * i] = res_real[adresses.first];
-				buf_real[2 * i + 1] = res_real[adresses.second];
-				buf_imag[2 * i] = res_im[adresses.first];
-				buf_imag[2 * i + 1] = res_im[adresses.second];
+				first_adress = adress_prefix_bit_mask & group_counter | (i << (epoch_counter * passes + 1)) | ((group_counter & adress_postfix_bit_mask) << passes);
+				second_adress = first_adress | (1 << epoch_counter * passes);
+				buf_real[2 * i] = res_real[first_adress];
+				buf_real[2 * i + 1] = res_real[second_adress];
+				buf_imag[2 * i] = res_im[first_adress];
+				buf_imag[2 * i + 1] = res_im[second_adress];
 			}
 			for (size_t pass_counter = 0; pass_counter < passes; ++pass_counter)
 			{
@@ -187,14 +163,48 @@ void m_FFT_vectorized_cached(std::vector<el_type> &src_real, std::vector<el_type
 				}
 				subsequence_size *= 2;
 			}
+			#pragma omp parallel for if(mthread_param == 1 && group_size >= 512)
 			for (int i = 0; i < group_size / 2; ++i)//load to main memory
 			{
-				adresses = calculate_butterfly_adresses(iterations, epoch_counter, passes, 0, group_counter, i);
-				res_real[adresses.first] = buf_real[2 * i];
-				res_real[adresses.second] = buf_real[2 * i + 1];
-				res_im[adresses.first] = buf_imag[2 * i];
-				res_im[adresses.second] = buf_imag[2 * i + 1];
+				first_adress = adress_prefix_bit_mask & group_counter | (i << (epoch_counter * passes + 1)) | ((group_counter & adress_postfix_bit_mask) << passes);
+				second_adress = first_adress | (1 << epoch_counter * passes);
+				res_real[first_adress] = buf_real[2 * i];
+				res_real[second_adress] = buf_real[2 * i + 1];
+				res_im[first_adress] = buf_imag[2 * i];
+				res_im[second_adress] = buf_imag[2 * i + 1];
 			}
+		}
+	}
+	if (iterations % passes != 0)
+	{
+		size_t subsequence_size = 1 << epochs * passes;
+		size_t t_adress;
+		el_type temp_real_t;
+		el_type temp_real_ss_plus_t;
+		el_type temp_imag_t;
+		el_type temp_imag_ss_plus_t;
+		for (size_t i = iterations - epochs * passes + 1; i < iterations; ++i)
+		{
+			#pragma omp parallel for if(mthread_param == 1 && size >= 1024)
+			for (int j = 0; j < size / (subsequence_size * 2); ++j)
+			{
+				#pragma ivdep
+				for (int t = 0; t < subsequence_size; ++t)
+				{
+					t_adress = j * subsequence_size * 2 + t;
+					temp_cos = cos(2 * (Pi / subsequence_size / 2)*t);
+					temp_sin = -sin(2 * (Pi / subsequence_size / 2)*t);
+					temp_real_t = res_real[t_adress] + (temp_cos * res_real[t_adress + subsequence_size] - temp_sin * res_im[t_adress + subsequence_size]);
+					temp_imag_t = res_im[t_adress] + (temp_sin * res_real[t_adress + subsequence_size] + temp_cos * res_im[t_adress + subsequence_size]);
+					temp_real_ss_plus_t = res_real[t_adress] - (temp_cos * res_real[t_adress + subsequence_size] - temp_sin * res_im[t_adress + subsequence_size]);
+					temp_imag_ss_plus_t = res_im[t_adress] - (temp_sin * res_real[t_adress + subsequence_size] + temp_cos * res_im[t_adress + subsequence_size]);
+					res_real[t_adress] = temp_real_t;
+					res_im[t_adress] = temp_imag_t;
+					res_real[t_adress + subsequence_size] = temp_real_ss_plus_t;
+					res_im[t_adress + subsequence_size] = temp_imag_ss_plus_t;
+				}
+			}
+			subsequence_size *= 2;
 		}
 	}
 }
@@ -336,7 +346,6 @@ void test_1()
 		m_FFT(x, x, 1);
 		my_fft_time = omp_get_wtime() - my_fft_time;
 		my_vectorized_fft_time = omp_get_wtime();
-		m_FFT_vectorized(z_real, z_im, z_real, z_im, 1);
 		my_vectorized_fft_time = omp_get_wtime() - my_vectorized_fft_time;
 		file_out << n << '\t' << mkl_time << '\t' << my_fft_time << '\t' << my_vectorized_fft_time << std::endl;
 		n *= 2;
@@ -411,7 +420,10 @@ void test_3()
 }
 void test_4()
 {
+	std::ofstream file_out("../out.xls");
+	file_out << std::fixed << std::showpoint << std::setprecision(3);
 	size_t n = 16777216;
+	size_t cache_size = 32;
 	double cached_time;
 	double standart_time;
 	std::vector<el_type> z_real(n);
@@ -424,21 +436,34 @@ void test_4()
 	{
 		el_type real = rand() % 20 / 10. - 1;
 		el_type imag = rand() % 20 / 10. - 1;
-		z_real[i] = real;
-		z_im[i] = imag;
 		x[i] = std::complex<el_type>(real, imag);
 	}
-	cached_time = omp_get_wtime();
-	m_FFT_vectorized_cached(z_real, z_im, z_real, z_im, 1024, 0);
-	cached_time = omp_get_wtime() - cached_time;
 	standart_time = omp_get_wtime();
-	m_FFT(x, x, 0);
+	m_FFT(x, x, 1);
 	standart_time = omp_get_wtime() - standart_time;
-	for (int i = 0; i < n; ++i)
+	file_out << standart_time << std::endl;
+	for (int i = 0; i < 15; ++i)
 	{
-		y[i] = std::complex<el_type>(z_real[i], z_im[i]);
+		for (int i = 0; i < n; ++i)
+		{
+			el_type real = rand() % 20 / 10. - 1;
+			el_type imag = rand() % 20 / 10. - 1;
+			z_real[i] = real;
+			z_im[i] = imag;
+			x[i] = std::complex<el_type>(real, imag);
+		}
+		cached_time = omp_get_wtime();
+		m_FFT_vectorized_cached(z_real, z_im, z_real, z_im, cache_size, 1);
+		cached_time = omp_get_wtime() - cached_time;
+		m_FFT(x, x, 1);
+		for (int i = 0; i < n; ++i)
+		{
+			y[i] = std::complex<el_type>(z_real[i], z_im[i]);
+		}
+		file_out << cache_size << '\t' << '\t' << cached_time << std::endl;
+		std::cout << check(1.e-7, x, y) << '\t' << i << std::endl;
+		cache_size *= 2;
 	}
-	std::cout << check(1.e-7, x, y) <<std::endl << standart_time << std::endl << cached_time;
 }
 
 int main()
