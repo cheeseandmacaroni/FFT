@@ -78,23 +78,10 @@ void m_FFT(t_complex_vector &src, t_complex_vector &res, bool mthread_param)
 	}
 }
 
-inline size_t calculate_W_n_exponent(size_t bits, size_t cur_epoch, size_t passes, size_t cur_pass, size_t g_counter, size_t b_counter)
-{
-	size_t res = 0;
-	res |= (g_counter & (1 << cur_epoch * passes) - 1); //g0,g1...
-	int k = 0;
-	for (size_t i = cur_epoch * passes; i < cur_epoch * passes + cur_pass; ++i)//b0,b1...
-	{
-		res |= (((b_counter >> k) & 1) << i);
-		++k;
-	}
-	res = res << ((bits - 1) - (cur_epoch * passes + cur_pass));
-	return res;
-}
-
 void m_FFT_vectorized_cached(std::vector<el_type> &src_real, std::vector<el_type> &src_im, std::vector<el_type> &res_real, std::vector<el_type> &res_im, size_t max_group_size, bool mthread_param)
 {
 	size_t size = src_real.size();
+	size_t global_subsequence_size = 1;
 	int iterations = my_log_2(size);
 	size_t max_passes = my_log_2(max_group_size);
 	size_t epochs;
@@ -102,6 +89,7 @@ void m_FFT_vectorized_cached(std::vector<el_type> &src_real, std::vector<el_type
 	size_t passes = my_log_2(group_size);
 	size_t adress_prefix_bit_mask;
 	size_t adress_postfix_bit_mask;
+	size_t exp_shift = iterations - 1;
 	el_type temp_cos;
 	el_type temp_sin;
 	if (&src_real != &res_real)
@@ -142,12 +130,13 @@ void m_FFT_vectorized_cached(std::vector<el_type> &src_real, std::vector<el_type
 			}
 			for (size_t pass_counter = 0; pass_counter < passes; ++pass_counter)
 			{
+				size_t butterfly_adress_mask = (1 << pass_counter)- 1;
 				for (int j = 0; j < group_size / (subsequence_size * 2); ++j)
 				{
 					#pragma ivdep
 					for (int t = 0; t < subsequence_size; ++t)
 					{
-						exp = calculate_W_n_exponent(iterations, epoch_counter, passes, pass_counter, group_counter, t);
+						exp = (group_counter & adress_prefix_bit_mask | ((t & butterfly_adress_mask) << epoch_counter * passes)) << exp_shift - pass_counter;
 						t_adress = j * subsequence_size * 2 + t;
 						temp_cos = cos(2 * Pi * exp / size);
 						temp_sin = -sin(2 * Pi * exp / size);
@@ -161,7 +150,7 @@ void m_FFT_vectorized_cached(std::vector<el_type> &src_real, std::vector<el_type
 						buf_imag[t_adress + subsequence_size] = temp_imag_ss_plus_t;
 					}
 				}
-				subsequence_size *= 2;
+				subsequence_size = subsequence_size << 1;
 			}
 			#pragma omp parallel for if(mthread_param == 1 && group_size >= 512)
 			for (int i = 0; i < group_size / 2; ++i)//load to main memory
@@ -174,10 +163,12 @@ void m_FFT_vectorized_cached(std::vector<el_type> &src_real, std::vector<el_type
 				res_im[second_adress] = buf_imag[2 * i + 1];
 			}
 		}
+		global_subsequence_size = global_subsequence_size << passes;
+		exp_shift -= passes;
 	}
 	if (iterations % passes != 0)
 	{
-		size_t subsequence_size = 1 << epochs * passes;
+		size_t subsequence_size = global_subsequence_size;
 		size_t t_adress;
 		el_type temp_real_t;
 		el_type temp_real_ss_plus_t;
@@ -469,5 +460,6 @@ void test_4()
 int main()
 {
 	test_4();
+	while (1);
 	return 0;
 }
