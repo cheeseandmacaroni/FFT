@@ -80,25 +80,25 @@ void m_FFT(t_complex_vector &src, t_complex_vector &res, bool mthread_param)
 
 void m_FFT_vectorized_cached(std::vector<el_type> &src_real, std::vector<el_type> &src_im, std::vector<el_type> &res_real, std::vector<el_type> &res_im, size_t max_group_size, bool mthread_param)
 {
-	size_t size = src_real.size();
+	const size_t size = src_real.size();
 	size_t global_subsequence_size = 1;
-	int iterations = my_log_2(size);
-	size_t max_passes = my_log_2(max_group_size);
-	size_t epochs;
-	size_t group_size = size < max_group_size ? size : max_group_size;
-	size_t passes = my_log_2(group_size);
+	const int iterations = my_log_2(size);
+	const size_t group_size = size < max_group_size ? size : max_group_size;
+	const size_t passes = my_log_2(group_size);
+	const size_t epochs = iterations / passes;
 	size_t adress_prefix_bit_mask;
 	size_t adress_postfix_bit_mask;
 	size_t exp_shift = iterations - 1;
-	el_type temp_cos;
-	el_type temp_sin;
+	std::vector<el_type> buf_real(group_size * omp_get_max_threads());
+	std::vector<el_type> buf_imag(group_size * omp_get_max_threads());
+	std::vector<el_type> pre_calc_sin((size / 2)* omp_get_max_threads());
+	std::vector<el_type> pre_calc_cos((size / 2)* omp_get_max_threads());
 	if (&src_real != &res_real)
 		res_real = src_real;
 	if (&src_im != &res_im)
 		res_im = src_im;
 	pre_permutation_algorithm(res_real);
 	pre_permutation_algorithm(res_im);
-	epochs = iterations / passes;
 	for (size_t epoch_counter = 0; epoch_counter < epochs; ++epoch_counter)
 	{
 		adress_prefix_bit_mask = (1 << epoch_counter * passes) - 1;
@@ -107,43 +107,39 @@ void m_FFT_vectorized_cached(std::vector<el_type> &src_real, std::vector<el_type
 		for (int group_counter = 0; group_counter < size / group_size; ++group_counter)
 		{
 			size_t subsequence_size = 1;
-			size_t t_adress;
-			el_type temp_real_t;
-			el_type temp_real_ss_plus_t;
-			el_type temp_imag_t;
-			el_type temp_imag_ss_plus_t;
-			std::vector<el_type> buf_real(group_size);
-			std::vector<el_type> buf_imag(group_size);
-			size_t exp;
-			size_t first_adress;
-			size_t second_adress;
+			size_t buf_start_adress = group_size * omp_get_thread_num();
+			size_t sincos_start_adress = (size / 2) * omp_get_thread_num();
+			size_t exp_postfix;
 			size_t cur_group;
 			#pragma omp parallel for if(mthread_param == 1 && group_size >= 512)
 			for (int i = 0; i < group_size / 2; ++i)//load to cache
 			{
-				first_adress = adress_prefix_bit_mask & group_counter | (i << (epoch_counter * passes + 1)) | ((group_counter & adress_postfix_bit_mask) << passes);
-				second_adress = first_adress | (1 << epoch_counter * passes);
-				buf_real[2 * i] = res_real[first_adress];
-				buf_real[2 * i + 1] = res_real[second_adress];
-				buf_imag[2 * i] = res_im[first_adress];
-				buf_imag[2 * i + 1] = res_im[second_adress];
+				size_t first_adress = adress_prefix_bit_mask & group_counter | (i << (epoch_counter * passes + 1)) | ((group_counter & adress_postfix_bit_mask) << passes);
+				size_t second_adress = first_adress | (1 << epoch_counter * passes);
+				buf_real[buf_start_adress + 2 * i] = res_real[first_adress];
+				buf_real[buf_start_adress + 2 * i + 1] = res_real[second_adress];
+				buf_imag[buf_start_adress + 2 * i] = res_im[first_adress];
+				buf_imag[buf_start_adress + 2 * i + 1] = res_im[second_adress];
 			}
 			for (size_t pass_counter = 0; pass_counter < passes; ++pass_counter)
 			{
-				size_t butterfly_adress_mask = (1 << pass_counter)- 1;
+				size_t butterfly_adress_mask = (1 << pass_counter) - 1;
+				exp_postfix = (group_counter & adress_prefix_bit_mask) << (exp_shift - pass_counter);
 				for (int j = 0; j < group_size / (subsequence_size * 2); ++j)
 				{
-					#pragma ivdep
+					#pragma omp simd
 					for (int t = 0; t < subsequence_size; ++t)
 					{
-						exp = (group_counter & adress_prefix_bit_mask | ((t & butterfly_adress_mask) << epoch_counter * passes)) << exp_shift - pass_counter;
-						t_adress = j * subsequence_size * 2 + t;
-						temp_cos = cos(2 * Pi * exp / size);
-						temp_sin = -sin(2 * Pi * exp / size);
-						temp_real_t = buf_real[t_adress] + (temp_cos * buf_real[t_adress + subsequence_size] - temp_sin * buf_imag[t_adress + subsequence_size]);
-						temp_imag_t = buf_imag[t_adress] + (temp_sin * buf_real[t_adress + subsequence_size] + temp_cos * buf_imag[t_adress + subsequence_size]);
-						temp_real_ss_plus_t = buf_real[t_adress] - (temp_cos * buf_real[t_adress + subsequence_size] - temp_sin * buf_imag[t_adress + subsequence_size]);
-						temp_imag_ss_plus_t = buf_imag[t_adress] - (temp_sin * buf_real[t_adress + subsequence_size] + temp_cos * buf_imag[t_adress + subsequence_size]);
+						el_type argument = 2 * Pi * (exp_postfix | ((t & butterfly_adress_mask) << epoch_counter * passes + exp_shift - pass_counter)) / size;
+						size_t t_adress = buf_start_adress + j * subsequence_size * 2 + t;
+						el_type temp_cos = cos(argument);
+						el_type temp_sin = -sin(argument);
+						el_type temp_first = (temp_cos * buf_real[t_adress + subsequence_size] - temp_sin * buf_imag[t_adress + subsequence_size]);
+						el_type temp_second = (temp_sin * buf_real[t_adress + subsequence_size] + temp_cos * buf_imag[t_adress + subsequence_size]);
+						el_type temp_real_t = buf_real[t_adress] + temp_first;
+						el_type temp_imag_t = buf_imag[t_adress] + temp_second;
+						el_type temp_real_ss_plus_t = buf_real[t_adress] - temp_first;
+						el_type temp_imag_ss_plus_t = buf_imag[t_adress] - temp_second;
 						buf_real[t_adress] = temp_real_t;
 						buf_imag[t_adress] = temp_imag_t;
 						buf_real[t_adress + subsequence_size] = temp_real_ss_plus_t;
@@ -155,12 +151,12 @@ void m_FFT_vectorized_cached(std::vector<el_type> &src_real, std::vector<el_type
 			#pragma omp parallel for if(mthread_param == 1 && group_size >= 512)
 			for (int i = 0; i < group_size / 2; ++i)//load to main memory
 			{
-				first_adress = adress_prefix_bit_mask & group_counter | (i << (epoch_counter * passes + 1)) | ((group_counter & adress_postfix_bit_mask) << passes);
-				second_adress = first_adress | (1 << epoch_counter * passes);
-				res_real[first_adress] = buf_real[2 * i];
-				res_real[second_adress] = buf_real[2 * i + 1];
-				res_im[first_adress] = buf_imag[2 * i];
-				res_im[second_adress] = buf_imag[2 * i + 1];
+				size_t first_adress = adress_prefix_bit_mask & group_counter | (i << (epoch_counter * passes + 1)) | ((group_counter & adress_postfix_bit_mask) << passes);
+				size_t second_adress = first_adress | (1 << epoch_counter * passes);
+				res_real[first_adress] = buf_real[buf_start_adress + 2 * i];
+				res_real[second_adress] = buf_real[buf_start_adress + 2 * i + 1];
+				res_im[first_adress] = buf_imag[buf_start_adress + 2 * i];
+				res_im[second_adress] = buf_imag[buf_start_adress + 2 * i + 1];
 			}
 		}
 		global_subsequence_size = global_subsequence_size << passes;
@@ -169,26 +165,23 @@ void m_FFT_vectorized_cached(std::vector<el_type> &src_real, std::vector<el_type
 	if (iterations % passes != 0)
 	{
 		size_t subsequence_size = global_subsequence_size;
-		size_t t_adress;
-		el_type temp_real_t;
-		el_type temp_real_ss_plus_t;
-		el_type temp_imag_t;
-		el_type temp_imag_ss_plus_t;
 		for (size_t i = iterations - epochs * passes + 1; i < iterations; ++i)
 		{
 			#pragma omp parallel for if(mthread_param == 1 && size >= 1024)
 			for (int j = 0; j < size / (subsequence_size * 2); ++j)
 			{
-				#pragma ivdep
+				#pragma omp simd
 				for (int t = 0; t < subsequence_size; ++t)
 				{
-					t_adress = j * subsequence_size * 2 + t;
-					temp_cos = cos(2 * (Pi / subsequence_size / 2)*t);
-					temp_sin = -sin(2 * (Pi / subsequence_size / 2)*t);
-					temp_real_t = res_real[t_adress] + (temp_cos * res_real[t_adress + subsequence_size] - temp_sin * res_im[t_adress + subsequence_size]);
-					temp_imag_t = res_im[t_adress] + (temp_sin * res_real[t_adress + subsequence_size] + temp_cos * res_im[t_adress + subsequence_size]);
-					temp_real_ss_plus_t = res_real[t_adress] - (temp_cos * res_real[t_adress + subsequence_size] - temp_sin * res_im[t_adress + subsequence_size]);
-					temp_imag_ss_plus_t = res_im[t_adress] - (temp_sin * res_real[t_adress + subsequence_size] + temp_cos * res_im[t_adress + subsequence_size]);
+					size_t t_adress = j * subsequence_size * 2 + t;
+					el_type temp_cos = cos(2 * (Pi / subsequence_size / 2)*t);
+					el_type temp_sin = -sin(2 * (Pi / subsequence_size / 2)*t);
+					el_type temp_first = temp_cos * res_real[t_adress + subsequence_size] - temp_sin * res_im[t_adress + subsequence_size];
+					el_type temp_second = temp_sin * res_real[t_adress + subsequence_size] + temp_cos * res_im[t_adress + subsequence_size];
+					el_type temp_real_t = res_real[t_adress] + temp_first;
+					el_type temp_imag_t = res_im[t_adress] + temp_second;
+					el_type temp_real_ss_plus_t = res_real[t_adress] - temp_first;
+					el_type temp_imag_ss_plus_t = res_im[t_adress] - temp_second;
 					res_real[t_adress] = temp_real_t;
 					res_im[t_adress] = temp_imag_t;
 					res_real[t_adress + subsequence_size] = temp_real_ss_plus_t;
@@ -460,6 +453,5 @@ void test_4()
 int main()
 {
 	test_4();
-	while (1);
 	return 0;
 }
