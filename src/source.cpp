@@ -15,7 +15,7 @@ typedef std::vector<std::complex<el_type>> t_complex_vector;
 constexpr double Pi = 3.14159265359;
 
 template <typename T>
-T m_reverse(T a, int bit_len)
+inline T m_reverse(T a, int bit_len)
 {
 	T res = 0;
 	for (int i = 0; i < bit_len; ++i)
@@ -43,12 +43,12 @@ void pre_permutation_algorithm(T &src)//src.size() must be power of 2
 {
 	int n = src.size();
 	int bit_length = my_log_2(n);
-	T res(n);
-	for (int i = 0; i < n; ++i)
+	for (int i = 1; i < n - 1; ++i)
 	{
-		res[m_reverse(i, bit_length)] = src[i];
+		size_t j = m_reverse(i, bit_length);
+		if (j <= i) continue;
+		std::swap(src[i], src[j]);
 	}
-	src = res;
 }
 
 void m_FFT(t_complex_vector &src, t_complex_vector &res, bool mthread_param)
@@ -82,8 +82,10 @@ void m_FFT_vectorized_cached(std::vector<el_type> &src_real, std::vector<el_type
 {
 	const size_t size = src_real.size();
 	size_t global_subsequence_size = 1;
+	const size_t bit_length = my_log_2(size);
 	const int iterations = my_log_2(size);
 	const size_t group_size = size < max_group_size ? size : max_group_size;
+	const size_t sincos_buffer_size = group_size / 2;
 	const size_t passes = my_log_2(group_size);
 	const size_t epochs = iterations / passes;
 	const el_type constant_factor = 2 * Pi / size;
@@ -92,12 +94,30 @@ void m_FFT_vectorized_cached(std::vector<el_type> &src_real, std::vector<el_type
 	size_t exp_shift = iterations - 1;
 	std::vector<el_type> buf_real(group_size * omp_get_max_threads());
 	std::vector<el_type> buf_imag(group_size * omp_get_max_threads());
+	std::vector<el_type> pre_calc_sin(2*sincos_buffer_size - 1);
+	std::vector<el_type> pre_calc_cos(2*sincos_buffer_size - 1);
 	if (&src_real != &res_real)
 		res_real = src_real;
 	if (&src_im != &res_im)
 		res_im = src_im;
-	pre_permutation_algorithm(res_real);
-	pre_permutation_algorithm(res_im);
+	#pragma omp parallel for if(mthread_param == 1)
+	for (size_t i = 1; i < size-1; ++i)
+	{
+		size_t j = m_reverse(i, bit_length);
+		if (j <= i) continue;
+		std::swap(res_real[i], res_real[j]);
+		std::swap(res_im[i], res_im[j]);
+	}
+	for (size_t i = 0; i < passes; ++i)
+	{
+		#pragma omp simd
+		for (size_t j = 0; j < (1 << i); ++j)
+		{
+			el_type argument = Pi*j/(1 << i);
+			pre_calc_cos[(1 << i) - 1 + j] = cos(argument);
+			pre_calc_sin[(1 << i) - 1 + j] = -sin(argument);
+		}
+	}
 	for (size_t epoch_counter = 0; epoch_counter < epochs; ++epoch_counter)
 	{
 		adress_prefix_bit_mask = (1 << epoch_counter * passes) - 1;
@@ -110,7 +130,6 @@ void m_FFT_vectorized_cached(std::vector<el_type> &src_real, std::vector<el_type
 			size_t first_butterfly_first_input_adress = adress_prefix_bit_mask & group_counter | ((group_counter & adress_postfix_bit_mask) << passes);
 			size_t exp_postfix;
 			size_t cur_group;
-			#pragma omp parallel for if(mthread_param == 1)
 			for (int i = 0; i < group_size; ++i)//load to cache
 			{
 				buf_real[buf_start_adress + i] = res_real[first_butterfly_first_input_adress + global_subsequence_size * i];
@@ -125,10 +144,21 @@ void m_FFT_vectorized_cached(std::vector<el_type> &src_real, std::vector<el_type
 					#pragma omp simd
 					for (int t = 0; t < subsequence_size; ++t)
 					{
-						el_type argument = constant_factor * (exp_postfix | ((t & butterfly_adress_mask) << epoch_counter * passes + exp_shift - pass_counter));
+						el_type temp_cos;
+						el_type temp_sin;
 						size_t t_adress = buf_start_adress + j * subsequence_size * 2 + t;
-						el_type temp_cos = cos(argument);
-						el_type temp_sin = -sin(argument);
+						if (epoch_counter == 0)
+						{
+							size_t sincos_index = (1 << pass_counter) - 1;
+							temp_cos = pre_calc_cos[sincos_index + t];
+							temp_sin = pre_calc_sin[sincos_index + t];
+						}
+						else
+						{
+							el_type argument = constant_factor * (exp_postfix | ((t & butterfly_adress_mask) << epoch_counter * passes + exp_shift - pass_counter));
+							temp_cos = cos(argument);
+							temp_sin = -sin(argument);
+						}
 						el_type temp_first = (temp_cos * buf_real[t_adress + subsequence_size] - temp_sin * buf_imag[t_adress + subsequence_size]);
 						el_type temp_second = (temp_sin * buf_real[t_adress + subsequence_size] + temp_cos * buf_imag[t_adress + subsequence_size]);
 						el_type temp_real_t = buf_real[t_adress] + temp_first;
@@ -143,7 +173,6 @@ void m_FFT_vectorized_cached(std::vector<el_type> &src_real, std::vector<el_type
 				}
 				subsequence_size = subsequence_size << 1;
 			}
-			#pragma omp parallel for if(mthread_param == 1)
 			for (int i = 0; i < group_size; ++i)//load to main memory
 			{
 				res_real[first_butterfly_first_input_adress + global_subsequence_size * i] = buf_real[buf_start_adress + i];
@@ -397,10 +426,10 @@ void test_4()
 {
 	std::ofstream file_out("../out.xls");
 	file_out << std::fixed << std::showpoint << std::setprecision(3);
-	size_t n = 16777216;
+	size_t n = 16'777'216;
 	size_t cache_size = 32;
 	double cached_time;
-	double standart_time;
+	double mkl_time;
 	std::vector<el_type> z_real(n);
 	std::vector<el_type> z_im(n);
 	std::vector<el_type> q_real(n);
@@ -413,10 +442,10 @@ void test_4()
 		el_type imag = rand() % 20 / 10. - 1;
 		x[i] = std::complex<el_type>(real, imag);
 	}
-	standart_time = omp_get_wtime();
-	m_FFT(x, x, 1);
-	standart_time = omp_get_wtime() - standart_time;
-	file_out << standart_time << std::endl;
+	mkl_time = omp_get_wtime();
+	mkl_fft(x, x);
+	mkl_time = omp_get_wtime() - mkl_time;
+	file_out << mkl_time << std::endl;
 	for (int i = 0; i < 15; ++i)
 	{
 		for (int i = 0; i < n; ++i)
@@ -440,9 +469,36 @@ void test_4()
 		cache_size *= 2;
 	}
 }
+void test_5()
+{
+	size_t n = 16'777'216;
+	size_t cache_size = 32;
+	n = 8;
+	cache_size = 4;
+	std::vector<el_type> z_real(n);
+	std::vector<el_type> z_im(n);
+	t_complex_vector x(n);
+	t_complex_vector y(n);
+	for (int i = 0; i < n; ++i)
+	{
+		el_type real = rand() % 20 / 10. - 1;
+		el_type imag = rand() % 20 / 10. - 1;
+		z_real[i] = i;
+		z_im[i] = 0;
+		x[i] = std::complex<el_type>(i, 0);
+	}
+	m_FFT_vectorized_cached(z_real, z_im, z_real, z_im, cache_size, 0);
+	m_FFT(x, x, 0);
+	for (int i = 0; i < n; ++i)
+	{
+		y[i] = std::complex<el_type>(z_real[i], z_im[i]);
+	}
+	std::cout << check(1.e-7, x, y) << std::endl;
+}
 
 int main()
 {
 	test_4();
+	while (1);
 	return 0;
 }

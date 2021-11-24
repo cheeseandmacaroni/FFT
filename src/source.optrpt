@@ -4,36 +4,50 @@ See "https://software.intel.com/en-us/intel-advisor-xe" for details.
 
 Intel(R) C++ Intel(R) 64 Compiler Classic for applications running on Intel(R) 64, Version 2021.3.0 Build 20210609_000000
 
-Compiler options: /o:release.exe /Qopt-report:3 /O2 /Qopenmp /Qmkl /Qopt-report-phase=vec,loop
+Compiler options: /o:res.exe /Qopt-report:3 /O2 /Qopenmp /Qmkl /Qopt-report-phase=vec,loop
+
+Begin optimization report for: main()
+
+    Report from: Loop nest & Vector optimizations [loop, vec]
+
+
+
+Non-optimizable loops:
+
+
+LOOP BEGIN at <compiler generated>
+   remark #15521: loop was not vectorized: loop control variable was not identified. Explicitly compute the iteration count before executing the loop or try using canonical loop form from OpenMP specification
+LOOP END
+===========================================================================
 
 Begin optimization report for: test_4()
 
     Report from: Loop nest & Vector optimizations [loop, vec]
 
 
-LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(323,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(417,21)
+LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(323,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(437,21)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
    remark #15346: vector dependence: assumed OUTPUT dependence between *_Backout._Backout (880:3) and _Backout._Backout (165:5)
 LOOP END
 
-LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(323,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(418,21)
+LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(323,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(438,21)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
    remark #15346: vector dependence: assumed OUTPUT dependence between *_Backout._Backout (880:3) and _Backout._Backout (165:5)
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(419,2)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(439,2)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
-   remark #15346: vector dependence: assumed OUTPUT dependence between call:rand() (421:18) and call:rand() (422:18)
+   remark #15346: vector dependence: assumed OUTPUT dependence between call:rand() (441:18) and call:rand() (442:18)
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(431,3)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(451,3)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
-   remark #15346: vector dependence: assumed OUTPUT dependence between call:rand() (433:19) and call:rand() (434:19)
+   remark #15346: vector dependence: assumed OUTPUT dependence between call:rand() (453:19) and call:rand() (454:19)
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(443,3)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(463,3)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
-   remark #15346: vector dependence: assumed OUTPUT dependence between U13d_V.U13d_V.U13d_V.U13d_V (595:15) and *(y.complex@N@std@@V?.complex@N@std@@V?.complex@N@std@@V?.comple (445:5)
+   remark #15346: vector dependence: assumed OUTPUT dependence between U13b_V.U13b_V.U13b_V.U13b_V (595:15) and *(y.complex@N@std@@V?.complex@N@std@@V?.complex@N@std@@V?.comple (465:5)
    remark #25438: unrolled without remainder by 2  
 LOOP END
 
@@ -41,10 +55,10 @@ LOOP END
 Non-optimizable loops:
 
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(429,2)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(449,2)
    remark #15543: loop was not vectorized: loop with function call not considered an optimization candidate.
 
-   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(263,27) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(448,16)
+   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(283,27) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(468,16)
       remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
    LOOP END
 LOOP END
@@ -55,39 +69,125 @@ Begin optimization report for: m_FFT_vectorized_cached(std::vector<el_type, std:
     Report from: Loop nest & Vector optimizations [loop, vec]
 
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(124,4)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(104,2)
    remark #25096: Loop Interchange not done due to: Imperfect Loop Nest (Either at Source or due to other Compiler Transformations)
    remark #25452: Original Order found to be proper, but by a close margin
-   remark #15542: loop was not vectorized: inner loop was already vectorized
+   remark #25084: Preprocess Loopnests: Moving Out Store    [ C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(105,2) ]
+   remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(128,5)
-      remark #15542: loop was not vectorized: inner loop was already vectorized
+   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(21,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(106,14)
+      remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or /Qvec-threshold0 to override
+      remark #15475: --- begin vector cost summary ---
+      remark #15476: scalar cost: 6 
+      remark #15477: vector cost: 23.000 
+      remark #15478: estimated potential speedup: 0.260 
+      remark #15487: type converts: 2 
+      remark #15488: --- end vector cost summary ---
+      remark #25439: unrolled with remainder by 2  
+   LOOP END
 
-      LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(131,6)
-         remark #15410: vectorization support: conversion from int to float will be emulated   [ C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(133,119) ]
-         remark #15301: SIMD LOOP WAS VECTORIZED
-         remark #15450: unmasked unaligned unit stride loads: 8 
-         remark #15451: unmasked unaligned unit stride stores: 4 
-         remark #15475: --- begin vector cost summary ---
-         remark #15476: scalar cost: 353 
-         remark #15477: vector cost: 122.500 
-         remark #15478: estimated potential speedup: 2.870 
-         remark #15482: vectorized math library calls: 1 
-         remark #15486: divides: 1 
-         remark #15487: type converts: 4 
-         remark #15488: --- end vector cost summary ---
-      LOOP END
-
-      LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(131,6)
-      <Remainder loop for vectorization>
-      LOOP END
+   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(21,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(106,14)
+   <Remainder>
    LOOP END
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(171,4)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(111,2)
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(174,5)
+   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(114,3)
+   <Peeled loop for vectorization>
+      remark #25015: Estimate of max trip count of loop=1
+   LOOP END
+
+   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(114,3)
+      remark #15410: vectorization support: conversion from int to float will be emulated   [ C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(116,26) ]
+      remark #15301: SIMD LOOP WAS VECTORIZED
+      remark #15442: entire loop may be executed in remainder
+      remark #15449: unmasked aligned unit stride stores: 2 
+      remark #15475: --- begin vector cost summary ---
+      remark #15476: scalar cost: 248 
+      remark #15477: vector cost: 73.500 
+      remark #15478: estimated potential speedup: 3.310 
+      remark #15482: vectorized math library calls: 1 
+      remark #15486: divides: 1 
+      remark #15487: type converts: 1 
+      remark #15488: --- end vector cost summary ---
+   LOOP END
+
+   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(114,3)
+   <Alternate Alignment Vectorized Loop>
+   LOOP END
+
+   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(114,3)
+   <Remainder loop for vectorization>
+   LOOP END
+LOOP END
+
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(126,3)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(133,4)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+      remark #15346: vector dependence: assumed ANTI dependence between buf_real (135:13) and i (133:38)
+   LOOP END
+
+   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(138,4)
+      remark #25096: Loop Interchange not done due to: Imperfect Loop Nest (Either at Source or due to other Compiler Transformations)
+      remark #25452: Original Order found to be proper, but by a close margin
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(142,5)
+         remark #15542: loop was not vectorized: inner loop was already vectorized
+
+         LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(145,6)
+         <Predicate Optimized v1>
+            remark #25422: Invariant Condition at line 150 hoisted out of this loop
+            remark #15301: SIMD LOOP WAS VECTORIZED
+            remark #15450: unmasked unaligned unit stride loads: 10 
+            remark #15451: unmasked unaligned unit stride stores: 4 
+            remark #15475: --- begin vector cost summary ---
+            remark #15476: scalar cost: 121 
+            remark #15477: vector cost: 48.250 
+            remark #15478: estimated potential speedup: 2.490 
+            remark #15487: type converts: 2 
+            remark #15488: --- end vector cost summary ---
+         LOOP END
+
+         LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(145,6)
+         <Remainder loop for vectorization, Predicate Optimized v1>
+         LOOP END
+
+         LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(145,6)
+         <Predicate Optimized v2>
+            remark #15410: vectorization support: conversion from int to float will be emulated   [ C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(158,129) ]
+            remark #15301: SIMD LOOP WAS VECTORIZED
+            remark #15450: unmasked unaligned unit stride loads: 8 
+            remark #15451: unmasked unaligned unit stride stores: 4 
+            remark #15475: --- begin vector cost summary ---
+            remark #15476: scalar cost: 329 
+            remark #15477: vector cost: 108.500 
+            remark #15478: estimated potential speedup: 3.020 
+            remark #15482: vectorized math library calls: 1 
+            remark #15487: type converts: 4 
+            remark #15488: --- end vector cost summary ---
+         LOOP END
+
+         LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(145,6)
+         <Remainder loop for vectorization, Predicate Optimized v2>
+         LOOP END
+      LOOP END
+   LOOP END
+
+   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(176,4)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+      remark #15346: vector dependence: assumed ANTI dependence between res_real->_Mypair (178:13) and i (176:38)
+   LOOP END
+LOOP END
+
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(191,4)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(194,5)
       remark #15301: SIMD LOOP WAS VECTORIZED
       remark #15450: unmasked unaligned unit stride loads: 8 
       remark #15451: unmasked unaligned unit stride stores: 4 
@@ -100,54 +200,97 @@ LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(171,4)
       remark #15488: --- end vector cost summary ---
    LOOP END
 
-   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(174,5)
+   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(194,5)
    <Remainder loop for vectorization>
    LOOP END
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(124,4)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(104,2)
    remark #25096: Loop Interchange not done due to: Imperfect Loop Nest (Either at Source or due to other Compiler Transformations)
    remark #25452: Original Order found to be proper, but by a close margin
-   remark #15542: loop was not vectorized: inner loop was already vectorized
+   remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(128,5)
-      remark #15542: loop was not vectorized: inner loop was already vectorized
+   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(21,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(106,14)
+      remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or /Qvec-threshold0 to override
+      remark #15475: --- begin vector cost summary ---
+      remark #15476: scalar cost: 7 
+      remark #15477: vector cost: 23.000 
+      remark #15478: estimated potential speedup: 0.300 
+      remark #15487: type converts: 2 
+      remark #15488: --- end vector cost summary ---
+      remark #25439: unrolled with remainder by 2  
+   LOOP END
 
-      LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(131,6)
-         remark #15410: vectorization support: conversion from int to float will be emulated   [ C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(133,119) ]
-         remark #15301: SIMD LOOP WAS VECTORIZED
-         remark #15450: unmasked unaligned unit stride loads: 8 
-         remark #15451: unmasked unaligned unit stride stores: 4 
-         remark #15475: --- begin vector cost summary ---
-         remark #15476: scalar cost: 377 
-         remark #15477: vector cost: 123.000 
-         remark #15478: estimated potential speedup: 3.050 
-         remark #15482: vectorized math library calls: 1 
-         remark #15486: divides: 1 
-         remark #15487: type converts: 4 
-         remark #15488: --- end vector cost summary ---
-      LOOP END
-
-      LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(131,6)
-      <Remainder loop for vectorization>
-      LOOP END
+   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(21,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(106,14)
+   <Remainder>
    LOOP END
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(114,4)
-   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
-   remark #15346: vector dependence: assumed OUTPUT dependence between buf_real (119:13) and buf_imag (122:13)
-LOOP END
-
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(151,4)
-   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
-   remark #15346: vector dependence: assumed ANTI dependence between *res_real->_Mypair (156:13) and *res_im->_Mypair->_Myval2->_Myfirst[second_adress] (159:11)
-LOOP END
-
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(171,4)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(126,3)
    remark #15542: loop was not vectorized: inner loop was already vectorized
 
-   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(174,5)
+   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(133,4)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+      remark #15346: vector dependence: assumed ANTI dependence between *buf_real (135:13) and *buf_imag->_Myfirst[buf_start_adress+i] (136:13)
+   LOOP END
+
+   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(138,4)
+      remark #25096: Loop Interchange not done due to: Imperfect Loop Nest (Either at Source or due to other Compiler Transformations)
+      remark #25452: Original Order found to be proper, but by a close margin
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(142,5)
+         remark #15542: loop was not vectorized: inner loop was already vectorized
+
+         LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(145,6)
+         <Predicate Optimized v1>
+            remark #25422: Invariant Condition at line 150 hoisted out of this loop
+            remark #15301: SIMD LOOP WAS VECTORIZED
+            remark #15450: unmasked unaligned unit stride loads: 10 
+            remark #15451: unmasked unaligned unit stride stores: 4 
+            remark #15475: --- begin vector cost summary ---
+            remark #15476: scalar cost: 148 
+            remark #15477: vector cost: 47.750 
+            remark #15478: estimated potential speedup: 3.080 
+            remark #15487: type converts: 2 
+            remark #15488: --- end vector cost summary ---
+         LOOP END
+
+         LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(145,6)
+         <Remainder loop for vectorization, Predicate Optimized v1>
+         LOOP END
+
+         LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(145,6)
+         <Predicate Optimized v2>
+            remark #15410: vectorization support: conversion from int to float will be emulated   [ C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(158,129) ]
+            remark #15301: SIMD LOOP WAS VECTORIZED
+            remark #15450: unmasked unaligned unit stride loads: 8 
+            remark #15451: unmasked unaligned unit stride stores: 4 
+            remark #15475: --- begin vector cost summary ---
+            remark #15476: scalar cost: 353 
+            remark #15477: vector cost: 107.500 
+            remark #15478: estimated potential speedup: 3.270 
+            remark #15482: vectorized math library calls: 1 
+            remark #15487: type converts: 4 
+            remark #15488: --- end vector cost summary ---
+         LOOP END
+
+         LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(145,6)
+         <Remainder loop for vectorization, Predicate Optimized v2>
+         LOOP END
+      LOOP END
+   LOOP END
+
+   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(176,4)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+      remark #15346: vector dependence: assumed ANTI dependence between *res_real->_Mypair (178:13) and *res_im->_Mypair->_Myval2->_Myfirst[first_butterfly_first_input_ (179:11)
+   LOOP END
+LOOP END
+
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(191,4)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(194,5)
       remark #15301: SIMD LOOP WAS VECTORIZED
       remark #15450: unmasked unaligned unit stride loads: 8 
       remark #15451: unmasked unaligned unit stride stores: 4 
@@ -160,7 +303,7 @@ LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(171,4)
       remark #15488: --- end vector cost summary ---
    LOOP END
 
-   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(174,5)
+   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(194,5)
    <Remainder loop for vectorization>
    LOOP END
 LOOP END
@@ -169,58 +312,24 @@ LOOP END
 Non-optimizable loops:
 
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(33,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(85,25)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(33,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(85,28)
    remark #15523: loop was not vectorized: loop control variable res was found, but loop iteration count cannot be computed before executing the loop
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(33,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(87,24)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(33,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(86,25)
    remark #15523: loop was not vectorized: loop control variable res was found, but loop iteration count cannot be computed before executing the loop
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(102,2)
-   remark #15543: loop was not vectorized: loop with function call not considered an optimization candidate.
-
-   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(107,3)
-      remark #15543: loop was not vectorized: loop with function call not considered an optimization candidate.
-   LOOP END
-LOOP END
-
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(168,3)
-   remark #15543: loop was not vectorized: loop with function call not considered an optimization candidate.
-LOOP END
-
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(107,3)
-   remark #15543: loop was not vectorized: loop with function call not considered an optimization candidate.
-LOOP END
-===========================================================================
-
-Begin optimization report for: pre_permutation_algorithm<std::vector<el_type, std::allocator<el_type>>>(std::vector<el_type, std::allocator<el_type>> &)
-
-    Report from: Loop nest & Vector optimizations [loop, vec]
-
-
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(47,2)
-   remark #25096: Loop Interchange not done due to: Imperfect Loop Nest (Either at Source or due to other Compiler Transformations)
-   remark #25451: Advice: Loop Interchange, if possible, might help loopnest. Suggested Permutation : ( 1 2 ) --> ( 2 1 ) 
-   remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
-
-   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(21,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(49,7)
-      remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or /Qvec-threshold0 to override
-      remark #15475: --- begin vector cost summary ---
-      remark #15476: scalar cost: 5 
-      remark #15477: vector cost: 33.750 
-      remark #15478: estimated potential speedup: 0.140 
-      remark #15482: vectorized math library calls: 1 
-      remark #15488: --- end vector cost summary ---
-   LOOP END
-LOOP END
-
-
-Non-optimizable loops:
-
-
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(33,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(45,19)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(33,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(89,24)
    remark #15523: loop was not vectorized: loop control variable res was found, but loop iteration count cannot be computed before executing the loop
+LOOP END
+
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(121,2)
+   remark #15543: loop was not vectorized: loop with function call not considered an optimization candidate.
+LOOP END
+
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(188,3)
+   remark #15543: loop was not vectorized: loop with function call not considered an optimization candidate.
 LOOP END
 ===========================================================================
 
@@ -229,16 +338,16 @@ Begin optimization report for: DFT(t_complex_vector &)
     Report from: Loop nest & Vector optimizations [loop, vec]
 
 
-LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(323,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(250,23)
+LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(323,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(270,23)
    remark #15527: loop was not vectorized: function call to ?1memset cannot be vectorized   [ C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory0(880,3) ]
    remark #25456: Number of Array Refs Scalar Replaced In Loop: 1
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(251,2)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(271,2)
    remark #25445: Loop Interchange not done due to: Data Dependencies
    remark #25446: Dependencies found between following statements:  [From_Line# -> (Dependency Type) To_Line#]
-   remark #25447: Dependence found between following statements:  [255 -> (Anti) 625]
-   remark #25447: Dependence found between following statements:  [255 -> (Anti) 624]
+   remark #25447: Dependence found between following statements:  [275 -> (Anti) 625]
+   remark #25447: Dependence found between following statements:  [275 -> (Anti) 624]
    remark #25447: Dependence found between following statements:  [595 -> (Output) 625]
    remark #25447: Dependence found between following statements:  [595 -> (Flow) 625]
    remark #25447: Dependence found between following statements:  [595 -> (Output) 624]
@@ -270,7 +379,7 @@ LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(251,2)
    remark #25447: Dependence found between following statements:  [624 -> (Flow) 1292]
    remark #25447: Dependence found between following statements:  [624 -> (Output) 595]
    remark #25447: Dependence found between following statements:  [624 -> (Anti) 595]
-   remark #25447: Dependence found between following statements:  [624 -> (Flow) 255]
+   remark #25447: Dependence found between following statements:  [624 -> (Flow) 275]
    remark #25447: Dependence found between following statements:  [625 -> (Flow) 625]
    remark #25447: Dependence found between following statements:  [625 -> (Anti) 625]
    remark #25447: Dependence found between following statements:  [625 -> (Output) 643]
@@ -282,22 +391,22 @@ LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(251,2)
    remark #25447: Dependence found between following statements:  [625 -> (Flow) 1292]
    remark #25447: Dependence found between following statements:  [625 -> (Output) 595]
    remark #25447: Dependence found between following statements:  [625 -> (Anti) 595]
-   remark #25447: Dependence found between following statements:  [625 -> (Flow) 255]
+   remark #25447: Dependence found between following statements:  [625 -> (Flow) 275]
    remark #25451: Advice: Loop Interchange, if possible, might help loopnest. Suggested Permutation : ( 1 2 ) --> ( 2 1 ) 
    remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(253,3)
+   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(273,3)
       remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
-      remark #15346: vector dependence: assumed ANTI dependence between res.complex@N@std@@V?.complex@N@std@@V?.complex@N@std@@V?.comple (255:7) and this->_Val[1] (625:3)
+      remark #15346: vector dependence: assumed ANTI dependence between res.complex@N@std@@V?.complex@N@std@@V?.complex@N@std@@V?.comple (275:7) and this->_Val[1] (625:3)
    LOOP END
 LOOP END
 
-LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(188,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(258,4)
+LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(188,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(278,4)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
    remark #15346: vector dependence: assumed OUTPUT dependence between _Backout._Backout->_Val[0] (881:11) and _Backout._Backout (165:5)
 LOOP END
 
-LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(188,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(258,4)
+LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(188,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(278,4)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
    remark #15346: vector dependence: assumed OUTPUT dependence between _Backout._Backout->_Val[0] (881:11) and _Backout._Backout (165:5)
 LOOP END
@@ -308,8 +417,8 @@ Begin optimization report for: check(el_type, t_complex_vector &, t_complex_vect
     Report from: Loop nest & Vector optimizations [loop, vec]
 
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(263,27)
-   remark #15520: loop was not vectorized: loop with multiple exits cannot be vectorized unless it meets search loop idiom criteria   [ C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(265,80) ]
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(283,27)
+   remark #15520: loop was not vectorized: loop with multiple exits cannot be vectorized unless it meets search loop idiom criteria   [ C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(285,80) ]
 LOOP END
 ===========================================================================
 
@@ -318,31 +427,31 @@ Begin optimization report for: test_1()
     Report from: Loop nest & Vector optimizations [loop, vec]
 
 
-LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(146,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(311,21)
+LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(146,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(331,21)
    remark #15527: loop was not vectorized: function call to ?1memset cannot be vectorized   [ C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory0(880,3) ]
    remark #25456: Number of Array Refs Scalar Replaced In Loop: 1
 LOOP END
 
-LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(323,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(312,21)
+LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(323,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(332,21)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
    remark #15346: vector dependence: assumed OUTPUT dependence between *_Backout._Backout (880:3) and _Backout._Backout (165:5)
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(316,2)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(336,2)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
-   remark #15346: vector dependence: assumed OUTPUT dependence between call:rand() (318:18) and call:rand() (319:18)
+   remark #15346: vector dependence: assumed OUTPUT dependence between call:rand() (338:18) and call:rand() (339:18)
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(340,3)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(360,3)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
-   remark #15346: vector dependence: assumed OUTPUT dependence between call:rand() (342:19) and call:rand() (343:19)
+   remark #15346: vector dependence: assumed OUTPUT dependence between call:rand() (362:19) and call:rand() (363:19)
 LOOP END
 
 
 Non-optimizable loops:
 
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(324,2)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(344,2)
    remark #15543: loop was not vectorized: loop with function call not considered an optimization candidate.
 LOOP END
 ===========================================================================
@@ -408,26 +517,26 @@ Begin optimization report for: test_2()
     Report from: Loop nest & Vector optimizations [loop, vec]
 
 
-LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(146,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(354,23)
+LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(146,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(374,23)
    remark #15527: loop was not vectorized: function call to ?1memset cannot be vectorized   [ C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory0(880,3) ]
    remark #25456: Number of Array Refs Scalar Replaced In Loop: 1
 LOOP END
 
-LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(323,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(355,23)
+LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(323,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(375,23)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
    remark #15346: vector dependence: assumed OUTPUT dependence between *_Backout._Backout (880:3) and _Backout._Backout (165:5)
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(356,2)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(376,2)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
-   remark #15346: vector dependence: assumed OUTPUT dependence between call:rand() (358:18) and call:rand() (359:18)
+   remark #15346: vector dependence: assumed OUTPUT dependence between call:rand() (378:18) and call:rand() (379:18)
 LOOP END
 
 
 Non-optimizable loops:
 
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(263,27) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(364,15)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(283,27) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(384,15)
    remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
 LOOP END
 ===========================================================================
@@ -437,34 +546,34 @@ Begin optimization report for: test_3()
     Report from: Loop nest & Vector optimizations [loop, vec]
 
 
-LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(323,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(370,23)
+LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(323,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(390,23)
    remark #15527: loop was not vectorized: function call to ?1memset cannot be vectorized   [ C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory0(880,3) ]
    remark #25456: Number of Array Refs Scalar Replaced In Loop: 1
 LOOP END
 
-LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(146,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(371,23)
+LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(146,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(391,23)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
    remark #15346: vector dependence: assumed OUTPUT dependence between *_Backout._Backout (880:3) and _Backout._Backout (165:5)
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(377,2)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(397,2)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
-   remark #15346: vector dependence: assumed OUTPUT dependence between call:rand() (379:18) and call:rand() (380:18)
+   remark #15346: vector dependence: assumed OUTPUT dependence between call:rand() (399:18) and call:rand() (400:18)
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(396,3)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(416,3)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
-   remark #15346: vector dependence: assumed OUTPUT dependence between call:rand() (398:19) and call:rand() (399:19)
+   remark #15346: vector dependence: assumed OUTPUT dependence between call:rand() (418:19) and call:rand() (419:19)
 LOOP END
 
 
 Non-optimizable loops:
 
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(383,2)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(403,2)
    remark #15532: loop was not vectorized: compile time constraints prevent loop optimization. Consider using -O3.
 
-   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(263,27) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(402,16)
+   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(283,27) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(422,16)
       remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
    LOOP END
 LOOP END
@@ -475,107 +584,107 @@ Begin optimization report for: m_two_dimensional_FT(t_complex_vector &, size_t, 
     Report from: Loop nest & Vector optimizations [loop, vec]
 
 
-LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(323,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(198,24)
+LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(323,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(218,24)
    remark #15527: loop was not vectorized: function call to ?1memset cannot be vectorized   [ C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory0(880,3) ]
    remark #25456: Number of Array Refs Scalar Replaced In Loop: 1
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(202,3)
-   remark #25084: Preprocess Loopnests: Moving Out Store    [ C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(202,28) ]
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(222,3)
+   remark #25084: Preprocess Loopnests: Moving Out Store    [ C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(222,28) ]
    remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
-   remark #15346: vector dependence: assumed ANTI dependence between src->_Mypair->_Myval2->_Myfirst (204:17) and at (204:8)
+   remark #15346: vector dependence: assumed ANTI dependence between src->_Mypair->_Myval2->_Myfirst (224:17) and at (224:8)
    remark #25439: unrolled with remainder by 16  
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(202,3)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(222,3)
 <Remainder>
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(207,3)
-   remark #25084: Preprocess Loopnests: Moving Out Store    [ C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(207,28) ]
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(227,3)
+   remark #25084: Preprocess Loopnests: Moving Out Store    [ C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(227,28) ]
    remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
-   remark #15346: vector dependence: assumed ANTI dependence between temp->_Myfirst (209:23) and at (209:7)
+   remark #15346: vector dependence: assumed ANTI dependence between temp->_Myfirst (229:23) and at (229:7)
    remark #25439: unrolled with remainder by 16  
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(207,3)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(227,3)
 <Remainder>
 LOOP END
 
-LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(323,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(212,7)
+LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(323,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(232,7)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
    remark #15346: vector dependence: assumed OUTPUT dependence between *_Backout._Backout (880:3) and _Backout._Backout (165:5)
 LOOP END
 
-LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(230,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(212,7)
+LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(230,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(232,7)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
    remark #15346: vector dependence: assumed OUTPUT dependence between _Backout._Backout->_Val[0] (881:11) and _Backout._Backout (165:5)
 LOOP END
 
-LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(323,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(212,7)
+LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(323,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(232,7)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
    remark #15346: vector dependence: assumed OUTPUT dependence between *_Backout._Backout (880:3) and _Backout._Backout (165:5)
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(216,3)
-   remark #25084: Preprocess Loopnests: Moving Out Store    [ C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(216,28) ]
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(236,3)
+   remark #25084: Preprocess Loopnests: Moving Out Store    [ C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(236,28) ]
    remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
-   remark #15346: vector dependence: assumed ANTI dependence between src->_Mypair->_Myval2->_Myfirst (218:17) and at (218:8)
+   remark #15346: vector dependence: assumed ANTI dependence between src->_Mypair->_Myval2->_Myfirst (238:17) and at (238:8)
    remark #25439: unrolled with remainder by 2  
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(216,3)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(236,3)
 <Remainder>
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(221,3)
-   remark #25084: Preprocess Loopnests: Moving Out Store    [ C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(221,28) ]
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(241,3)
+   remark #25084: Preprocess Loopnests: Moving Out Store    [ C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(241,28) ]
    remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
-   remark #15346: vector dependence: assumed ANTI dependence between temp->_Myfirst (223:25) and at (223:7)
+   remark #15346: vector dependence: assumed ANTI dependence between temp->_Myfirst (243:25) and at (243:7)
    remark #25439: unrolled with remainder by 2  
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(221,3)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(241,3)
 <Remainder>
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(202,3)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(222,3)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
-   remark #15346: vector dependence: assumed ANTI dependence between *src->_Mypair->_Myval2->_Myfirst (204:17) and at (204:8)
+   remark #15346: vector dependence: assumed ANTI dependence between *src->_Mypair->_Myval2->_Myfirst (224:17) and at (224:8)
    remark #25439: unrolled with remainder by 16  
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(202,3)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(222,3)
 <Remainder>
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(207,3)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(227,3)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
-   remark #15346: vector dependence: assumed ANTI dependence between *temp (209:23) and at (209:7)
+   remark #15346: vector dependence: assumed ANTI dependence between *temp (229:23) and at (229:7)
    remark #25439: unrolled with remainder by 16  
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(207,3)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(227,3)
 <Remainder>
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(216,3)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(236,3)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
-   remark #15346: vector dependence: assumed ANTI dependence between *src->_Mypair->_Myval2->_Myfirst (218:17) and at (218:8)
+   remark #15346: vector dependence: assumed ANTI dependence between *src->_Mypair->_Myval2->_Myfirst (238:17) and at (238:8)
    remark #25439: unrolled with remainder by 2  
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(216,3)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(236,3)
 <Remainder>
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(221,3)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(241,3)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
-   remark #15346: vector dependence: assumed ANTI dependence between *temp (223:25) and at (223:7)
+   remark #15346: vector dependence: assumed ANTI dependence between *temp (243:25) and at (243:7)
    remark #25439: unrolled with remainder by 2  
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(221,3)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(241,3)
 <Remainder>
 LOOP END
 
@@ -583,19 +692,19 @@ LOOP END
 Non-optimizable loops:
 
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(200,2)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(220,2)
    remark #15543: loop was not vectorized: loop with function call not considered an optimization candidate.
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(214,2)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(234,2)
    remark #15543: loop was not vectorized: loop with function call not considered an optimization candidate.
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(200,2)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(220,2)
    remark #15543: loop was not vectorized: loop with function call not considered an optimization candidate.
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(214,2)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(234,2)
    remark #15543: loop was not vectorized: loop with function call not considered an optimization candidate.
 LOOP END
 ===========================================================================
@@ -605,29 +714,24 @@ Begin optimization report for: m_FFT(t_complex_vector &, t_complex_vector &, boo
     Report from: Loop nest & Vector optimizations [loop, vec]
 
 
-LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(188,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(62,7)
+LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(188,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(62,7)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
    remark #15346: vector dependence: assumed FLOW dependence between _Backout._Backout->_Val[0] (881:11) and _Backout._Backout->_Val (881:11)
    remark #25456: Number of Array Refs Scalar Replaced In Loop: 1
 LOOP END
 
-LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(188,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(62,7)
+LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(188,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(62,7)
    remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
    remark #15346: vector dependence: assumed FLOW dependence between _Backout._Backout->_Val[0] (881:11) and _Backout._Backout->_Val (881:11)
    remark #25456: Number of Array Refs Scalar Replaced In Loop: 1
 LOOP END
 
-LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(323,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(63,2)
-   remark #15527: loop was not vectorized: function call to ?1memset cannot be vectorized   [ C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory0(880,3) ]
-   remark #25456: Number of Array Refs Scalar Replaced In Loop: 1
-LOOP END
-
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(47,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(63,2)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(46,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(63,2)
    remark #25096: Loop Interchange not done due to: Imperfect Loop Nest (Either at Source or due to other Compiler Transformations)
    remark #25452: Original Order found to be proper, but by a close margin
    remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(21,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(63,2)
+   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(21,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(63,2)
       remark #15335: loop was not vectorized: vectorization possible but seems inefficient. Use vector always directive or /Qvec-threshold0 to override
       remark #15475: --- begin vector cost summary ---
       remark #15476: scalar cost: 5 
@@ -638,31 +742,31 @@ LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(47,2) i
    LOOP END
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(67,3)
-   remark #25084: Preprocess Loopnests: Moving Out Store    [ C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(68,3) ]
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(67,3)
+   remark #25084: Preprocess Loopnests: Moving Out Store    [ C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(68,3) ]
    remark #25096: Loop Interchange not done due to: Imperfect Loop Nest (Either at Source or due to other Compiler Transformations)
    remark #25452: Original Order found to be proper, but by a close margin
    remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(69,4)
-      remark #25084: Preprocess Loopnests: Moving Out Store    [ C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(72,55) ]
-      remark #25084: Preprocess Loopnests: Moving Out Store    [ C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(72,55) ]
-      remark #25084: Preprocess Loopnests: Moving Out Store    [ C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(69,44) ]
+   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(69,4)
+      remark #25084: Preprocess Loopnests: Moving Out Store    [ C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(71,18) ]
+      remark #25084: Preprocess Loopnests: Moving Out Store    [ C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(71,18) ]
+      remark #25084: Preprocess Loopnests: Moving Out Store    [ C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(72,19) ]
+      remark #25084: Preprocess Loopnests: Moving Out Store    [ C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(72,19) ]
+      remark #25084: Preprocess Loopnests: Moving Out Store    [ C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(69,44) ]
       remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
-      remark #15346: vector dependence: assumed ANTI dependence between res->_Mypair->_Myval2->_Myfirst (71:21) and at (74:8)
+      remark #15346: vector dependence: assumed ANTI dependence between res->_Mypair->_Myval2->_Myfirst (71:21) and res[1] (74:8)
    LOOP END
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(67,3)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(67,3)
    remark #25096: Loop Interchange not done due to: Imperfect Loop Nest (Either at Source or due to other Compiler Transformations)
    remark #25452: Original Order found to be proper, but by a close margin
    remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(69,4)
-      remark #25084: Preprocess Loopnests: Moving Out Store    [ C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(72,55) ]
-      remark #25084: Preprocess Loopnests: Moving Out Store    [ C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(72,55) ]
+   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(69,4)
       remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
-      remark #15346: vector dependence: assumed ANTI dependence between *res->_Mypair->_Myval2->_Myfirst (71:21) and at (74:8)
+      remark #15346: vector dependence: assumed ANTI dependence between *res->_Mypair->_Myval2->_Myfirst (71:21) and res[1] (74:8)
    LOOP END
 LOOP END
 
@@ -670,34 +774,16 @@ LOOP END
 Non-optimizable loops:
 
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(33,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(57,19)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(33,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(57,19)
    remark #15523: loop was not vectorized: loop control variable res was found, but loop iteration count cannot be computed before executing the loop
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(33,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(63,2)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(33,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(63,2)
    remark #15523: loop was not vectorized: loop control variable res was found, but loop iteration count cannot be computed before executing the loop
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(64,2)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(64,2)
    remark #15543: loop was not vectorized: loop with function call not considered an optimization candidate.
-LOOP END
-===========================================================================
-
-Begin optimization report for: std::vector<std::complex<double>, std::allocator<std::complex<double>>>::_Assign_range<std::_Simple_types<std::complex<double>>::value_type *>(std::vector<std::complex<double>, std::allocator<std::complex<double>>> *, std::_Simple_types<std::complex<double>>::value_type *, std::_Simple_types<std::complex<double>>::value_type *, std::forward_iterator_tag)
-
-    Report from: Loop nest & Vector optimizations [loop, vec]
-
-
-LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(188,2) inlined into C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\vector(1367,22)
-   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
-   remark #15346: vector dependence: assumed FLOW dependence between _Backout._Backout->_Val[0] (881:11) and _Backout._Backout->_Val (881:11)
-   remark #25456: Number of Array Refs Scalar Replaced In Loop: 1
-LOOP END
-
-LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(188,2) inlined into C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\vector(1374,22)
-   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
-   remark #15346: vector dependence: assumed FLOW dependence between _Backout._Backout->_Val[0] (881:11) and _Backout._Backout->_Val (881:11)
-   remark #25456: Number of Array Refs Scalar Replaced In Loop: 1
 LOOP END
 ===========================================================================
 
@@ -706,26 +792,64 @@ Begin optimization report for: m_two_dimensional_DFT(t_complex_vector &, size_t,
     Report from: Loop nest & Vector optimizations [loop, vec]
 
 
-LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(323,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(230,25)
+LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(323,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(250,25)
    remark #15527: loop was not vectorized: function call to ?1memset cannot be vectorized   [ C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory0(880,3) ]
    remark #25456: Number of Array Refs Scalar Replaced In Loop: 1
 LOOP END
 
-LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(231,2)
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(251,2)
    remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(233,3)
+   LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(253,3)
       remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-      LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(235,4)
+      LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(255,4)
          remark #15541: outer loop was not auto-vectorized: consider using SIMD directive
 
-         LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\Source.cpp(237,5)
+         LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(257,5)
             remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
-            remark #15346: vector dependence: assumed ANTI dependence between res.complex@N@std@@V?.complex@N@std@@V?.complex@N@std@@V?.comple (239:9) and this->_Val[1] (625:3)
+            remark #15346: vector dependence: assumed ANTI dependence between res.complex@N@std@@V?.complex@N@std@@V?.complex@N@std@@V?.comple (259:9) and this->_Val[1] (625:3)
          LOOP END
       LOOP END
    LOOP END
+LOOP END
+===========================================================================
+
+Begin optimization report for: test_5()
+
+    Report from: Loop nest & Vector optimizations [loop, vec]
+
+
+LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(323,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(480,21)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed OUTPUT dependence between *_Backout._Backout (880:3) and _Backout._Backout (165:5)
+   remark #25436: completely unrolled by 8  
+LOOP END
+
+LOOP BEGIN at C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\include\xmemory(323,2) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(481,21)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed OUTPUT dependence between *_Backout._Backout (880:3) and _Backout._Backout (165:5)
+   remark #25436: completely unrolled by 8  
+LOOP END
+
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(482,2)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed OUTPUT dependence between call:rand() (484:18) and call:rand() (485:18)
+   remark #25436: completely unrolled by 8  
+LOOP END
+
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(492,2)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+   remark #15346: vector dependence: assumed OUTPUT dependence between U143_V.U143_V.U143_V.U143_V (595:15) and *(y.complex@N@std@@V?.complex@N@std@@V?.complex@N@std@@V?.comple (494:4)
+   remark #25436: completely unrolled by 8  
+LOOP END
+
+
+Non-optimizable loops:
+
+
+LOOP BEGIN at C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(283,27) inlined into C:\Users\Nikita\Desktop\git projects\my_FFT\src\source.cpp(496,15)
+   remark #15523: loop was not vectorized: loop control variable i was found, but loop iteration count cannot be computed before executing the loop
 LOOP END
 ===========================================================================
 

@@ -31,3 +31,6 @@
 build
 build x64
 
+#compiler flags
+compiler flags.txt
+
