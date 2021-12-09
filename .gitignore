@@ -34,3 +34,6 @@ build x64
 #compiler flags
 compiler flags.txt
 
+hello_world.cpp
+fftscript
+
